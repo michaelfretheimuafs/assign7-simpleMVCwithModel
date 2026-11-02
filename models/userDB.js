@@ -1,3 +1,4 @@
+const mysql = require("mysql2");
 // Simulated database
 const users = [
   { "id": 1, "fname": "Jim", "lname": "Smith", "username": "jsmith" },
@@ -10,18 +11,32 @@ const users = [
   { "id": 8, "fname": "Jordan", "lname": "Wilson", "username": "jwilson" }
 ];
 
+const connection = mysql.createConnection({
+  host: "localhost",
+  user: "assignDBuser",
+  password: "assignDBpass",
+  database: "assignDB"
+});
+
 function getUsers(callback) {
-  setTimeout(function () {
-    callback(users);
-  }, 1000);
+  connection.query("SELECT * FROM users", 
+    function (err, results) {
+    callback(results);
+  });
 }
 
 function addUser(user, callback) {
-  setTimeout(function () {
-    user.id = users.length + 1;
-    users.push(user);
-    callback(user);
-  }, 500);
+    connection.query(
+    "INSERT INTO users (fname, lname, username, passwd) VALUES (?, ?, ?, ?)",
+    [user.fname, user.lname, user.username, user.passwd],
+    function (err, results) {
+      if (err){
+        console.error(err);
+        return;
+      }
+      callback(results);
+    }
+  );
 }
 
 module.exports = { getUsers, addUser };
